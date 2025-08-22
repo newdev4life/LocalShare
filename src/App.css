@@ -1,0 +1,669 @@
+/* 桌面应用样式重置 */
+.desktop-app {
+  height: 100vh;
+  overflow: hidden;
+  background: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* 标题栏 - 默认样式 */
+.title-bar {
+  height: 48px;
+  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+  border-bottom: 1px solid #d0d0d0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  -webkit-app-region: drag;
+}
+
+/* macOS 样式 */
+.title-bar.mac {
+  padding-left: 80px; /* 为三色按钮留空间 */
+}
+
+/* Windows 样式 */
+.title-bar.windows {
+  background: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  padding-right: 140px; /* 为 Windows 控制按钮留空间 */
+}
+
+/* Windows 控制按钮 */
+.windows-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.windows-control-btn {
+  width: 46px;
+  height: 48px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.windows-control-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.windows-control-btn.close:hover {
+  background: #e81123;
+  color: white;
+}
+
+.title-bar h1 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* PIN 码相关样式 */
+.pin-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+.pin-display {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #333;
+  min-width: 50px;
+  text-align: center;
+}
+
+.pin-btn {
+  padding: 4px 8px;
+  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+  border: 1px solid #c0c0c0;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.pin-btn:hover {
+  background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+  border-color: #a0a0a0;
+}
+
+/* 桌面应用容器 */
+.desktop-app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 应用主体布局 */
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0; /* 允许内容收缩 */
+  overflow: hidden;
+}
+
+/* 侧边栏 */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: #f8f9fa;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 主内容区域 */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: #fbfbfb;
+  min-height: 0;
+}
+
+/* 状态栏 */
+.status-bar {
+  height: 26px;
+  min-height: 26px;
+  background: #e8e8e8;
+  border-top: 1px solid #d0d0d0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 11px;
+  color: #666;
+  flex-shrink: 0; /* 防止状态栏被压缩 */
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.current-page-info {
+  font-size: 11px;
+  color: #666;
+}
+
+.status-address {
+  font-size: 11px;
+  color: #333;
+  font-weight: 500;
+}
+
+.pin-indicator {
+  color: #007acc;
+  font-weight: 500;
+}
+
+/* 标题栏信息区域 */
+.title-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  margin-right: 16px;
+}
+
+.server-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* 桌面风格的卡片 */
+.desktop-card {
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.desktop-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.desktop-card-header {
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, #fafafa, #f0f0f0);
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 6px 6px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.desktop-card-body {
+  padding: 16px;
+}
+
+/* 桌面风格的拖拽区域 */
+.desktop-drop-zone {
+  background: #fafafa;
+  border: 2px dashed #c0c0c0;
+  border-radius: 6px;
+  padding: 40px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.desktop-drop-zone:hover {
+  background: #f0f0f0;
+  border-color: #007acc;
+}
+
+.desktop-drop-zone .icon {
+  font-size: 36px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.desktop-drop-zone .text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.desktop-drop-zone .hint {
+  font-size: 12px;
+  color: #999;
+}
+
+/* 桌面风格的按钮 */
+.desktop-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.desktop-btn {
+  padding: 6px 12px;
+  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.desktop-btn:hover {
+  background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+  border-color: #a0a0a0;
+}
+
+.desktop-btn:active {
+  background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+  border-color: #808080;
+}
+
+/* 桌面风格的表格 */
+.desktop-table {
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+}
+
+.desktop-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.desktop-table th {
+  background: linear-gradient(to bottom, #f8f8f8, #f0f0f0);
+  border-bottom: 1px solid #d0d0d0;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+.desktop-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: #333;
+}
+
+.desktop-table tr:hover td {
+  background: #f8f8f8;
+}
+
+/* 状态指示器 */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.status-indicator.success {
+  background: #e8f5e8;
+  color: #2d7d2d;
+  border: 1px solid #c8e8c8;
+}
+
+.status-indicator.error {
+  background: #ffe8e8;
+  color: #d32f2f;
+  border: 1px solid #ffc8c8;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-dot.success {
+  background: #4caf50;
+}
+
+.status-dot.error {
+  background: #f44336;
+}
+
+/* ========== 新页面样式 ========== */
+
+/* 服务器状态页面 */
+.server-status-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.server-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.server-address {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.server-tip {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* PIN 设置 */
+.pin-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-label {
+  flex: 1;
+}
+
+.setting-label strong {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.setting-desc {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pin-enabled {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.current-pin {
+  font-size: 12px;
+  color: #333;
+}
+
+.pin-btn.primary {
+  background: linear-gradient(to bottom, #007acc, #005a9e);
+  color: white;
+  border: 1px solid #005a9e;
+}
+
+.pin-btn.primary:hover {
+  background: linear-gradient(to bottom, #005a9e, #004080);
+}
+
+.pin-btn.danger {
+  background: linear-gradient(to bottom, #dc3545, #b02a37);
+  color: white;
+  border: 1px solid #b02a37;
+}
+
+.pin-btn.danger:hover {
+  background: linear-gradient(to bottom, #b02a37, #8e1f2a);
+}
+
+/* 关于页面 */
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.app-info {
+  text-align: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.app-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.app-version {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.app-description {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.feature-item h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.feature-item ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.feature-item li {
+  margin-bottom: 6px;
+}
+
+.usage-guide {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.usage-guide h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.usage-guide ol {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.usage-guide li {
+  margin-bottom: 8px;
+}
+
+/* 设置页面 */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.setting-group {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-group:last-child {
+  border-bottom: none;
+}
+
+.setting-group h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+}
+
+.setting-group .setting-item {
+  padding: 8px 0;
+  border-bottom: none;
+}
+
+.setting-label {
+  font-size: 13px;
+  color: #666;
+  min-width: 100px;
+}
+
+.setting-value {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border: 1px solid #d0d0d0;
+  background: linear-gradient(to bottom, #ffffff, #f8f8f8);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+  border-color: #a0a0a0;
+}
+
+.action-btn:active {
+  background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+  transform: translateY(1px);
+}
+
+/* 文件列表自定义样式 */
+.file-list .ant-list-item {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #f5f5f5 !important;
+}
+
+.file-list .ant-list-item:last-child {
+  border-bottom: none !important;
+}
+
+.file-list .ant-list-item:hover {
+  background-color: #fafafa;
+}
+
+.file-list .ant-list-item-meta-avatar {
+  margin-right: 12px !important;
+}
+
+.file-list .ant-list-item-action {
+  margin-left: 16px !important;
+}
+
+/* Ant Design Menu 自定义样式 */
+.sidebar .ant-menu {
+  font-size: 13px !important;
+}
+
+.sidebar .ant-menu-item {
+  height: 40px !important;
+  line-height: 40px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.sidebar .ant-menu-item-selected {
+  background-color: #1890ff !important;
+  color: white !important;
+}
+
+.sidebar .ant-menu-item-selected::after {
+  display: none !important;
+}
+
+.sidebar .ant-menu-item:hover {
+  color: #1890ff !important;
+}
+
+.sidebar .ant-menu-item-selected:hover {
+  color: white !important;
+}
+
+.sidebar .ant-menu-item-icon {
+  font-size: 14px !important;
+}
