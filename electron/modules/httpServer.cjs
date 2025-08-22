@@ -2,6 +2,7 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
+const archiver = require('archiver')
 const { renderPage, renderPinForm, renderNotFound } = require('./pageRenderer.cjs')
 
 class HttpServer {
@@ -60,6 +61,12 @@ class HttpServer {
       return
     }
 
+    // 处理下载请求
+    if (urlPath.startsWith('/download/')) {
+      this.handleDownloadRequest(urlPath, res)
+      return
+    }
+
     // 检查PIN保护
     if (this.pinProtectionEnabled) {
       const cookies = req.headers.cookie || ''
@@ -105,26 +112,41 @@ class HttpServer {
       const full = typeof meta === 'string' ? { path: meta } : meta
       let sizeCell = '-'
       let type = '文件'
+      let isDirectory = false
       try {
         const s = fs.statSync(full.path)
         if (s.isDirectory()) {
           type = '文件夹'
+          isDirectory = true
         } else {
           sizeCell = this.formatBytes(s.size)
         }
       } catch (_) {}
+      
+      const downloadUrl = `/download/${encodeURIComponent(name)}`
+      const browseUrl = `/${encodeURIComponent(name)}`
+      
       return `<tr>
-        <td><a href="/${encodeURIComponent(name)}">${this.escapeHtml(name)}</a><div class="type">${type}</div></td>
+        <td>
+          ${isDirectory ? 
+            `<a href="${browseUrl}">${this.escapeHtml(name)}</a>` : 
+            `<span>${this.escapeHtml(name)}</span>`
+          }
+          <div class="type">${type}</div>
+        </td>
         <td>${sizeCell}</td>
+        <td style="width:100px">
+          <a href="${downloadUrl}" class="download-btn">下载</a>
+        </td>
       </tr>`
     }).join('')
 
     const content = `
       <table>
         <thead>
-          <tr><th>名称</th><th style="width:160px">大小</th></tr>
+          <tr><th>名称</th><th style="width:160px">大小</th><th style="width:100px">操作</th></tr>
         </thead>
-        <tbody>${rows || '<tr><td colspan="2">暂无共享文件</td></tr>'}</tbody>
+        <tbody>${rows || '<tr><td colspan="3">暂无共享文件</td></tr>'}</tbody>
       </table>
     `
     res.end(renderPage({ title: 'LocalShare', content, serverAddress: this.serverAddress }))
@@ -173,7 +195,10 @@ class HttpServer {
     let curRel = subPath
     const crumbs = []
     let acc = ''
-    crumbs.push(`<a href="/${encodeURIComponent(rootName)}">${this.escapeHtml(rootName)}</a>`)
+    crumbs.push(`
+      <a href="/" style="padding-left: 10px;">首页</a>
+      <span>/</span>
+      <a href="/${encodeURIComponent(rootName)}">${this.escapeHtml(rootName)}</a>`)
     if (curRel) {
       const parts = curRel.split('/')
       for (const part of parts) {
@@ -187,12 +212,18 @@ class HttpServer {
       const entryPath = path.join(targetPath, e.name)
       let sizeCell = '-'
       let href = `/${encodeURIComponent(rootName)}/${subPath ? subPath + '/' : ''}${encodeURIComponent(e.name)}`
+      let downloadUrl = `/download/${encodeURIComponent(rootName)}/${subPath ? subPath + '/' : ''}${encodeURIComponent(e.name)}`
+      
       if (e.isFile()) {
         try { sizeCell = this.formatBytes(fs.statSync(entryPath).size) } catch (_) {}
       }
+      
       return `<tr>
         <td><a href="${href}">${this.escapeHtml(e.name)}</a><div class="type">${e.isDirectory() ? '文件夹' : '文件'}</div></td>
         <td>${sizeCell}</td>
+        <td style="width:100px">
+          <a href="${downloadUrl}" class="download-btn">下载</a>
+        </td>
       </tr>`
     }).join('')
 
@@ -200,12 +231,91 @@ class HttpServer {
       <div class="breadcrumb">${crumbs.join(' / ')}</div>
       <table>
         <thead>
-          <tr><th>名称</th><th style="width:160px">大小</th></tr>
+          <tr><th>名称</th><th style="width:160px">大小</th><th style="width:100px">操作</th></tr>
         </thead>
-        <tbody>${rows || '<tr><td colspan="2">空目录</td></tr>'}</tbody>
+        <tbody>${rows || '<tr><td colspan="3">空目录</td></tr>'}</tbody>
       </table>
     `
     res.end(renderPage({ title: `浏览 - ${clean}`, content, serverAddress: this.serverAddress }))
+  }
+
+  // 处理下载请求
+  handleDownloadRequest(urlPath, res) {
+    const clean = urlPath.replace(/^\/download\//, '')
+    const [rootName, ...rest] = clean.split('/')
+    const meta = this.sharedFiles.get(decodeURIComponent(rootName))
+    const base = typeof meta === 'string' ? meta : (meta && meta.path)
+
+    if (!base) {
+      renderNotFound(res, clean)
+      return
+    }
+
+    // 目标路径（限制在共享根目录内）
+    const subPath = rest.map(part => decodeURIComponent(part)).join('/')
+    const targetPath = path.resolve(base, subPath)
+    const normalizedBase = path.resolve(base)
+    if (!targetPath.startsWith(normalizedBase)) {
+      res.writeHead(403)
+      res.end('Forbidden')
+      return
+    }
+
+    let stats
+    try {
+      stats = fs.statSync(targetPath)
+    } catch (_) {
+      renderNotFound(res, clean)
+      return
+    }
+
+    if (stats.isDirectory()) {
+      const dirName = path.basename(targetPath)
+      this.handleDirectoryDownload(targetPath, dirName, res)
+    } else {
+      this.handleFileDownload(targetPath, res)
+    }
+  }
+
+  // 处理文件夹压缩下载
+  handleDirectoryDownload(dirPath, dirName, res) {
+    const archive = archiver('zip', {
+      zlib: { level: 9 } // 设置压缩级别
+    })
+
+    res.writeHead(200, {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(dirName)}.zip"`
+    })
+
+    archive.pipe(res)
+
+    // 递归添加文件夹内容到压缩包
+    this.addDirectoryToArchive(archive, dirPath, dirName)
+
+    archive.finalize()
+  }
+
+  // 递归添加文件夹内容到压缩包
+  addDirectoryToArchive(archive, dirPath, relativePath) {
+    try {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+      
+      for (const entry of entries) {
+        const entryPath = path.join(dirPath, entry.name)
+        const archivePath = path.join(relativePath, entry.name)
+        
+        if (entry.isDirectory()) {
+          // 递归处理子文件夹
+          this.addDirectoryToArchive(archive, entryPath, archivePath)
+        } else {
+          // 添加文件
+          archive.file(entryPath, { name: archivePath })
+        }
+      }
+    } catch (err) {
+      console.error('Error adding directory to archive:', err)
+    }
   }
 
   // 处理文件下载

@@ -29,7 +29,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon":"build/icons/icon.ico"
+      "icon": "build/icons/icon.ico"
     },
     "linux": {
       "target": "AppImage",
@@ -42,6 +42,7 @@
     "@types/react-dom": "^18.2.21",
     "@vitejs/plugin-react": "^4.2.1",
     "antd": "^5.15.1",
+    "archiver": "^6.0.2",
     "electron": "^29.1.1",
     "electron-builder": "^24.13.3",
     "react": "^18.2.0",
