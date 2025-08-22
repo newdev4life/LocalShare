@@ -33,7 +33,7 @@
     },
     "linux": {
       "target": "AppImage",
-      "icon": "build/icons/png"  
+      "icon": "build/icons/png/512x512.png"
     }
   },
   "devDependencies": {

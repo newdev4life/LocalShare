@@ -27,9 +27,8 @@ out/
 
 # 忽略 build 目录下的构建输出，但保留 icon 资源
 build/*
-!build/icons/icon.icns
-!build/icons/icon.ico
-!build/icons/png
+!build/icons/
+!build/icons/**/*
 
 
 # Electron specific
