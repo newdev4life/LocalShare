@@ -24,13 +24,12 @@ jspm_packages/
 dist/
 release/
 out/
-build/
 
 # 忽略 build 目录下的构建输出，但保留 icon 资源
 build/*
-!build/icon.icns
-!build/icon.ico
-!build/png
+!build/icons/icon.icns
+!build/icons/icon.ico
+!build/icons/png
 
 
 # Electron specific
