@@ -1,4 +1,4 @@
-name: Quick Build Test
+name: CI Build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
-  quick-build:
+  build-linux:
     runs-on: ubuntu-latest
     
     steps:
@@ -29,19 +29,20 @@ jobs:
     - name: Build frontend
       run: npm run build
 
-    - name: Test Linux build
+    - name: Build Electron app (Linux)
       run: npm run electron:build:linux
       env:
         NODE_ENV: production
         ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
         ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload test build
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: test-build-linux
+        name: localshare-linux-build
         path: |
           release/*.AppImage
           release/*.zip
+          !release/*.blockmap
+          !release/*.yml
         retention-days: 7 

@@ -34,6 +34,7 @@ jobs:
         NODE_ENV: production
         ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
         ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v4
@@ -72,6 +73,7 @@ jobs:
         NODE_ENV: production
         ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
         ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload macOS artifacts
       uses: actions/upload-artifact@v4
@@ -110,6 +112,7 @@ jobs:
         NODE_ENV: production
         ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
         ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v4

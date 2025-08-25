@@ -12,10 +12,10 @@
     "electron:build:mac": "npm run build && electron-builder --mac",
     "electron:build:linux": "npm run build && electron-builder --linux"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["electron", "file-sharing", "local-network", "desktop-app"],
+  "author": "LocalShare Team",
+  "license": "MIT",
+  "description": "A simple and easy-to-use local network file sharing tool built with Electron",
   "build": {
     "appId": "com.localshare.app",
     "productName": "LocalShare",
@@ -29,7 +29,8 @@
     "mac": {
       "category": "public.app-category.utilities",
       "icon": "build/icons/icon.icns",
-      "identity": null
+      "identity": null,
+      "hardenedRuntime": false
     },
     "win": {
       "target": "nsis",
@@ -38,7 +39,10 @@
     "linux": {
       "target": "AppImage",
       "icon": "build/icons/png/512x512.png"
-    }
+    },
+    "publish": null,
+    "forceCodeSigning": false,
+    "electronVersion": "29.4.6"
   },
   "dependencies": {
     "archiver": "^7.0.1",

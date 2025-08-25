@@ -47,6 +47,7 @@ jobs:
         NODE_ENV: production
         ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
         ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
