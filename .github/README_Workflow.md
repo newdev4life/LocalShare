@@ -9,17 +9,27 @@
 - **触发**: 推送到 main/master 分支或创建标签
 - **优势**: 并行构建，效率更高，构建产物更清晰
 
-### 2. **build.yml** 
+### 2. **release.yml** (发布专用)
+- **功能**: 专门用于创建 GitHub Release
+- **触发**: 推送标签 (如 `v1.0.0`)
+- **优势**: 下载构建产物并创建 Release
+
+### 3. **manual-release.yml** (手动触发)
+- **功能**: 手动触发构建和发布
+- **触发**: 手动触发，可选择平台和版本
+- **优势**: 灵活控制，支持选择性构建
+
+### 4. **build.yml** 
 - **功能**: 矩阵构建，支持多个 Node.js 版本
 - **触发**: 推送到 main/master 分支或创建标签
 - **优势**: 测试多个 Node.js 版本的兼容性
 
-### 3. **test.yml**
+### 5. **test.yml**
 - **功能**: 代码质量检查和测试
 - **触发**: 推送到 main/master 分支或 Pull Request
 - **包含**: TypeScript 检查、构建测试、ESLint 检查
 
-### 4. **quick-build.yml**
+### 6. **quick-build.yml**
 - **功能**: 快速构建测试
 - **触发**: 推送到 main/master 分支或 Pull Request
 - **优势**: 快速验证构建是否成功

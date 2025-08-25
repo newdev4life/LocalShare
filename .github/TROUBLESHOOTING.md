@@ -19,7 +19,17 @@
 - ✅ 已在所有构建步骤中添加 `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}`
 - ✅ 使用 GitHub 自动提供的 `GITHUB_TOKEN`
 
-### 3. 构建失败
+### 3. GitHub Release 403 错误
+
+**问题**: `GitHub release failed with status: 403`
+
+**解决方案**:
+- ✅ 添加了明确的权限配置：`permissions: { contents: write, actions: read }`
+- ✅ 创建了专门的 Release 工作流 (`release.yml`)
+- ✅ 创建了手动触发的工作流 (`manual-release.yml`)
+- ✅ 确保使用正确的 `GITHUB_TOKEN`
+
+### 4. 构建失败
 
 **常见原因**:
 1. **依赖安装失败**
@@ -41,7 +51,7 @@
    ls -la build/icons/
    ```
 
-### 4. 平台特定问题
+### 5. 平台特定问题
 
 #### Windows 构建问题
 - **问题**: Windows 代码签名错误
@@ -55,7 +65,7 @@
 - **问题**: AppImage 构建失败
 - **解决**: 确保使用 Ubuntu 最新版本运行器
 
-### 5. 缓存问题
+### 6. 缓存问题
 
 **清理缓存**:
 ```bash
@@ -67,7 +77,7 @@ rm -rf ~/.cache/electron
 rm -rf ~/.cache/electron-builder
 ```
 
-### 6. 内存不足
+### 7. 内存不足
 
 **解决方案**:
 - 使用 `npm ci` 而不是 `npm install`
