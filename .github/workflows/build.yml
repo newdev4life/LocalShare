@@ -1,0 +1,88 @@
+name: Build Electron App
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20]
+        exclude:
+          # 排除一些组合以减少构建时间
+          - os: ubuntu-latest
+            node-version: 18
+          - os: windows-latest
+            node-version: 18
+          - os: macos-latest
+            node-version: 18
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build Electron app
+      run: npm run electron:build
+      env:
+        # 设置环境变量以优化构建
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: localshare-${{ matrix.os }}-${{ matrix.node-version }}
+        path: |
+          release/
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 30
+
+  # 专门用于发布的工作流
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/**/*.dmg
+          artifacts/**/*.exe
+          artifacts/**/*.AppImage
+          artifacts/**/*.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

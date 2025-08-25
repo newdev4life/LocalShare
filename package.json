@@ -7,7 +7,10 @@
     "dev": "node scripts/dev.js",
     "build": "tsc -p tsconfig.node.json && vite build",
     "preview": "vite preview",
-    "electron:build": "npm run build && electron-builder"
+    "electron:build": "npm run build && electron-builder",
+    "electron:build:win": "npm run build && electron-builder --win",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:linux": "npm run build && electron-builder --linux"
   },
   "keywords": [],
   "author": "",

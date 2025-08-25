@@ -1,0 +1,71 @@
+name: Test and Lint
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check TypeScript
+      run: npx tsc --noEmit
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Check build output
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "Build output directory 'dist' not found!"
+          exit 1
+        fi
+        echo "Build successful! Found files:"
+        ls -la dist/
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint (if configured)
+      run: |
+        if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
+          npx eslint src/ --ext .ts,.tsx
+        else
+          echo "ESLint not configured, skipping..."
+        fi
+
+    - name: Check code formatting
+      run: |
+        if [ -f ".prettierrc" ]; then
+          npx prettier --check src/
+        else
+          echo "Prettier not configured, skipping..."
+        fi 

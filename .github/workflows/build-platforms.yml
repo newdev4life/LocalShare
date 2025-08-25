@@ -1,0 +1,167 @@
+name: Build for Platforms
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # Windows 构建
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for Windows
+      run: npm run electron:build -- --win
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: localshare-windows
+        path: |
+          release/*.exe
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 30
+
+  # macOS 构建
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for macOS
+      run: npm run electron:build -- --mac
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: localshare-macos
+        path: |
+          release/*.dmg
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 30
+
+  # Linux 构建
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for Linux
+      run: npm run electron:build -- --linux
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: localshare-linux
+        path: |
+          release/*.AppImage
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 30
+
+  # 发布工作流
+  release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/**/*.dmg
+          artifacts/**/*.exe
+          artifacts/**/*.AppImage
+          artifacts/**/*.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        body: |
+          ## 🚀 LocalShare Release
+          
+          ### 📦 Downloads
+          - **Windows**: `.exe` installer
+          - **macOS**: `.dmg` disk image
+          - **Linux**: `.AppImage` portable app
+          
+          ### 🔧 Installation
+          1. Download the appropriate file for your platform
+          2. Run the installer or mount the disk image
+          3. Follow the installation instructions
+          
+          ### 📋 Changes
+          See the commit history for detailed changes.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
