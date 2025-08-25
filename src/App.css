@@ -667,3 +667,76 @@
 .sidebar .ant-menu-item-icon {
   font-size: 14px !important;
 }
+
+/* 上传功能设置样式 */
+.toggle-btn {
+  padding: 6px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.toggle-btn.enabled {
+  background: linear-gradient(to bottom, #52c41a, #389e0d);
+  color: white;
+  border-color: #389e0d;
+}
+
+.toggle-btn.enabled:hover {
+  background: linear-gradient(to bottom, #389e0d, #237804);
+}
+
+.toggle-btn.disabled {
+  background: linear-gradient(to bottom, #f5f5f5, #e8e8e8);
+  color: #666;
+  border-color: #d0d0d0;
+}
+
+.toggle-btn.disabled:hover {
+  background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+}
+
+.path-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.path-input {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fafafa;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.browse-btn {
+  padding: 6px 12px;
+  background: linear-gradient(to bottom, #007acc, #005a9e);
+  color: white;
+  border: 1px solid #005a9e;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.browse-btn:hover {
+  background: linear-gradient(to bottom, #005a9e, #004080);
+}
+
+.path-display {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  word-break: break-all;
+}

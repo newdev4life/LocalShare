@@ -38,7 +38,8 @@
     }
   },
   "dependencies": {
-    "archiver": "^7.0.1"
+    "archiver": "^7.0.1",
+    "formidable": "^3.5.4"
   },
   "devDependencies": {
     "@ant-design/icons": "^5.3.0",

@@ -39,6 +39,15 @@ function renderPage({ title, content, serverAddress = '' }) {
     .pin-input { padding: 12px; font-size: 18px; width: 120px; text-align: center; margin: 16px 8px; border: 2px solid var(--muted); border-radius: 8px; background: var(--card); color: var(--text); }
     .pin-btn { padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin: 8px; }
     .pin-error { color: #ef4444; margin-top: 12px; }
+    .upload-section { padding: 20px; border-bottom: 1px solid #1f2937; }
+    .upload-form { display: flex; align-items: center; gap: 12px; }
+    .file-input { flex: 1; padding: 8px; border: 2px dashed var(--muted); border-radius: 6px; background: var(--card); color: var(--text); }
+    .upload-btn { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .upload-status { margin-top: 12px; font-size: 13px; }
+    .upload-success { color: #10b981; }
+    .upload-error { color: #ef4444; }
+    .download-btn { padding: 4px 8px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
   </style>
   </head>
   <body>

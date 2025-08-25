@@ -23,6 +23,10 @@ const App: React.FC = () => {
   const [pinEnabled, setPinEnabled] = useState<boolean>(false);
   const [platform, setPlatform] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<PageType>('files');
+  
+  // 上传功能配置状态
+  const [uploadEnabled, setUploadEnabled] = useState<boolean>(false);
+  const [uploadPath, setUploadPath] = useState<string>('');
 
   useEffect(() => {
     // 确保 electron 对象存在
@@ -49,6 +53,16 @@ const App: React.FC = () => {
             setCurrentPin(status.pin);
           }
           setPinEnabled(status.pinEnabled || false);
+        })
+        .catch(() => {});
+
+      // 获取上传配置
+      window.electron.ipcRenderer.invoke('get-upload-config')
+        .then((config: any) => {
+          if (config) {
+            setUploadEnabled(config.enabled);
+            setUploadPath(config.path);
+          }
         })
         .catch(() => {});
 
@@ -93,6 +107,34 @@ const App: React.FC = () => {
     await window.electron?.ipcRenderer.invoke('disable-pin');
     setCurrentPin('');
     setPinEnabled(false);
+  };
+
+  // 上传功能配置处理
+  const handleUploadToggle = async (enabled: boolean) => {
+    const result = await window.electron?.ipcRenderer.invoke('set-upload-config', {
+      enabled,
+      uploadPath: uploadPath || ''
+    });
+    if (result?.success) {
+      setUploadEnabled(enabled);
+    }
+  };
+
+  const handleUploadPathChange = async (newPath: string) => {
+    const result = await window.electron?.ipcRenderer.invoke('set-upload-config', {
+      enabled: uploadEnabled,
+      uploadPath: newPath
+    });
+    if (result?.success) {
+      setUploadPath(newPath);
+    }
+  };
+
+  const handlePickUploadDirectory = async () => {
+    const selectedPath = await window.electron?.ipcRenderer.invoke('pick-upload-directory');
+    if (selectedPath) {
+      await handleUploadPathChange(selectedPath);
+    }
   };
 
   const isMac = platform === 'darwin';
@@ -285,6 +327,54 @@ const App: React.FC = () => {
                     <span className="setting-label">共享文件数:</span>
                     <span className="setting-value">{files.length} 个</span>
                   </div>
+                </div>
+
+                <div className="setting-group">
+                  <h4>上传功能设置</h4>
+                  <div className="setting-item">
+                    <div className="setting-label">
+                      <strong>启用上传功能</strong>
+                      <div className="setting-desc">允许其他设备通过网页界面上传文件到指定目录</div>
+                    </div>
+                    <div className="setting-control">
+                      <button 
+                        className={`toggle-btn ${uploadEnabled ? 'enabled' : 'disabled'}`}
+                        onClick={() => handleUploadToggle(!uploadEnabled)}
+                      >
+                        {uploadEnabled ? '已启用' : '已禁用'}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {uploadEnabled && (
+                    <div className="setting-item">
+                      <div className="setting-label">
+                        <strong>上传目录</strong>
+                        <div className="setting-desc">设置文件上传的目标目录</div>
+                      </div>
+                      <div className="setting-control">
+                        <div className="path-input-group">
+                          <input
+                            type="text"
+                            className="path-input"
+                            value={uploadPath}
+                            onChange={(e) => setUploadPath(e.target.value)}
+                            placeholder="选择上传目录..."
+                            readOnly
+                          />
+                          <button 
+                            className="browse-btn"
+                            onClick={handlePickUploadDirectory}
+                          >
+                            浏览
+                          </button>
+                        </div>
+                        <div className="path-display">
+                          当前路径: {uploadPath || '未设置'}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="setting-group">

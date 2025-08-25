@@ -14,6 +14,10 @@ class HttpServer {
     this.pinProtectionEnabled = false
     this.serverAddress = null
     this.onStatusChange = null // 状态变化回调
+    
+    // 上传功能配置
+    this.uploadEnabled = false
+    this.uploadPath = process.cwd() // 默认上传到当前目录
   }
 
   // 获取本地IP地址
@@ -64,6 +68,12 @@ class HttpServer {
     // 处理下载请求
     if (urlPath.startsWith('/download/')) {
       this.handleDownloadRequest(urlPath, res)
+      return
+    }
+
+    // 处理上传请求
+    if (req.method === 'POST' && urlPath === '/upload') {
+      this.handleFileUpload(req, res)
       return
     }
 
@@ -141,13 +151,69 @@ class HttpServer {
       </tr>`
     }).join('')
 
+    const uploadForm = this.uploadEnabled ? `
+      <div class="upload-section">
+        <form class="upload-form" enctype="multipart/form-data">
+          <input type="file" name="file" class="file-input" multiple accept="*/*" />
+          <button type="submit" class="upload-btn">上传文件</button>
+        </form>
+        <div class="upload-status" id="uploadStatus"></div>
+      </div>
+    ` : ''
+
     const content = `
+      ${uploadForm}
       <table>
         <thead>
           <tr><th>名称</th><th style="width:160px">大小</th><th style="width:100px">操作</th></tr>
         </thead>
         <tbody>${rows || '<tr><td colspan="3">暂无共享文件</td></tr>'}</tbody>
       </table>
+      <script>
+        document.querySelector('.upload-form').addEventListener('submit', async (e) => {
+          e.preventDefault()
+          const formData = new FormData()
+          const fileInput = document.querySelector('input[type="file"]')
+          const statusDiv = document.getElementById('uploadStatus')
+          const submitBtn = document.querySelector('.upload-btn')
+          
+          if (fileInput.files.length === 0) {
+            statusDiv.innerHTML = '<span class="upload-error">请选择文件</span>'
+            return
+          }
+          
+          for (let file of fileInput.files) {
+            formData.append('file', file)
+          }
+          
+          submitBtn.disabled = true
+          submitBtn.textContent = '上传中...'
+          statusDiv.innerHTML = '<span>正在上传...</span>'
+          
+          try {
+            const response = await fetch('/upload', {
+              method: 'POST',
+              body: formData
+            })
+            
+            const result = await response.json()
+            
+            if (result.success) {
+              statusDiv.innerHTML = '<span class="upload-success">' + result.message + '</span>'
+              fileInput.value = ''
+              // 刷新页面以显示新上传的文件
+              setTimeout(() => location.reload(), 1000)
+            } else {
+              statusDiv.innerHTML = '<span class="upload-error">上传失败: ' + (result.error || '未知错误') + '</span>'
+            }
+          } catch (error) {
+            statusDiv.innerHTML = '<span class="upload-error">上传失败: ' + error.message + '</span>'
+          } finally {
+            submitBtn.disabled = false
+            submitBtn.textContent = '上传文件'
+          }
+        })
+      </script>
     `
     res.end(renderPage({ title: 'LocalShare', content, serverAddress: this.serverAddress }))
   }
@@ -318,6 +384,83 @@ class HttpServer {
     }
   }
 
+  // 处理文件上传
+  handleFileUpload(req, res) {
+    // 检查上传功能是否启用
+    if (!this.uploadEnabled) {
+      res.writeHead(403, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: '上传功能未启用' }))
+      return
+    }
+
+    const formidable = require('formidable')
+    const form = formidable({
+      uploadDir: this.getUploadDir(),
+      keepExtensions: true,
+      maxFileSize: 100 * 1024 * 1024, // 100MB 限制
+      multiples: true
+    })
+
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        console.error('Upload error:', err)
+        res.writeHead(500, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ error: '上传失败' }))
+        return
+      }
+
+      const uploadedFiles = []
+      const fileArray = Array.isArray(files.file) ? files.file : [files.file]
+
+      for (const file of fileArray) {
+        if (file && file.filepath) {
+          const fileName = file.originalFilename || path.basename(file.filepath)
+          const targetPath = path.join(this.getUploadDir(), fileName)
+          
+          try {
+            // 如果文件已存在，添加数字后缀
+            let finalPath = targetPath
+            let counter = 1
+            while (fs.existsSync(finalPath)) {
+              const ext = path.extname(targetPath)
+              const name = path.basename(targetPath, ext)
+              finalPath = path.join(path.dirname(targetPath), `${name}_${counter}${ext}`)
+              counter++
+            }
+
+            // 移动文件到目标位置
+            fs.renameSync(file.filepath, finalPath)
+            
+            // 添加到共享文件列表
+            const relativePath = path.relative(process.cwd(), finalPath)
+            this.sharedFiles.set(fileName, relativePath)
+            
+            uploadedFiles.push({
+              name: path.basename(finalPath),
+              size: file.size,
+              path: relativePath
+            })
+          } catch (moveErr) {
+            console.error('Error moving uploaded file:', moveErr)
+          }
+        }
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ 
+        success: true, 
+        files: uploadedFiles,
+        message: `成功上传 ${uploadedFiles.length} 个文件`
+      }))
+    })
+  }
+
+  // 获取上传目录
+  getUploadDir() {
+    // 使用配置的上传路径
+    return this.uploadPath
+  }
+
   // 处理文件下载
   handleFileDownload(filePath, res) {
     fs.stat(filePath, (err, stats) => {
@@ -400,6 +543,31 @@ class HttpServer {
     return {
       pin: this.currentPin,
       enabled: this.pinProtectionEnabled
+    }
+  }
+
+  // 上传功能配置方法
+  setUploadConfig(enabled, uploadPath) {
+    this.uploadEnabled = enabled
+    if (uploadPath && uploadPath.trim()) {
+      try {
+        // 确保上传路径存在
+        if (!fs.existsSync(uploadPath)) {
+          fs.mkdirSync(uploadPath, { recursive: true })
+        }
+        this.uploadPath = path.resolve(uploadPath)
+      } catch (err) {
+        console.error('Error setting upload path:', err)
+        return false
+      }
+    }
+    return true
+  }
+
+  getUploadConfig() {
+    return {
+      enabled: this.uploadEnabled,
+      path: this.uploadPath
     }
   }
 }

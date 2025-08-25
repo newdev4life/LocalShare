@@ -81,6 +81,24 @@ class IpcHandlers {
       return this.httpServer.getPinStatus()
     })
 
+    // 上传功能配置
+    ipcMain.handle('get-upload-config', async () => {
+      return this.httpServer.getUploadConfig()
+    })
+
+    ipcMain.handle('set-upload-config', async (event, { enabled, uploadPath }) => {
+      const success = this.httpServer.setUploadConfig(enabled, uploadPath)
+      return { success }
+    })
+
+    ipcMain.handle('pick-upload-directory', async () => {
+      const result = await dialog.showOpenDialog({
+        properties: ['openDirectory']
+      })
+      if (result.canceled) return null
+      return result.filePaths[0]
+    })
+
     // Windows 窗口控制
     ipcMain.on('window-minimize', () => {
       this.windowManager.minimize()
@@ -116,6 +134,9 @@ class IpcHandlers {
       ipcMain.removeHandler('generate-pin')
       ipcMain.removeHandler('disable-pin')
       ipcMain.removeHandler('get-pin')
+      ipcMain.removeHandler('get-upload-config')
+      ipcMain.removeHandler('set-upload-config')
+      ipcMain.removeHandler('pick-upload-directory')
     } catch (error) {
       // 忽略已经移除或不存在的处理器错误
       console.warn('清理 IPC 处理器时出现警告:', error.message)
