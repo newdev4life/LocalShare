@@ -21,13 +21,22 @@
 
 ### 3. GitHub Release 403 错误
 
-**问题**: `GitHub release failed with status: 403`
+**问题**: `GitHub release failed with status: 403` 或 `Resource not accessible by integration`
 
 **解决方案**:
 - ✅ 添加了明确的权限配置：`permissions: { contents: write, actions: read }`
-- ✅ 创建了专门的 Release 工作流 (`release.yml`)
-- ✅ 创建了手动触发的工作流 (`manual-release.yml`)
-- ✅ 确保使用正确的 `GITHUB_TOKEN`
+- ✅ 替换第三方 Action 为 GitHub CLI 命令
+- ✅ 创建了多个备选工作流：
+  - `release.yml` - 使用 GitHub CLI
+  - `gh-cli-release.yml` - 纯 GitHub CLI 版本
+  - `simple-release.yml` - 使用官方 Action
+- ✅ 创建了权限检查脚本
+
+**详细步骤**:
+1. 确保仓库设置中启用了 Actions 权限
+2. 检查仓库的 Actions 设置是否允许工作流写入内容
+3. 使用 GitHub CLI 替代第三方 Action
+4. 如果仍有问题，手动创建 Release 并上传文件
 
 ### 4. 构建失败
 

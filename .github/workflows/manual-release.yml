@@ -157,24 +157,15 @@ jobs:
         path: artifacts
 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ github.event.inputs.version }}
-        files: |
-          artifacts/**/*.dmg
-          artifacts/**/*.exe
-          artifacts/**/*.AppImage
-          artifacts/**/*.zip
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-        body: |
-          ## 🚀 LocalShare Release ${{ github.event.inputs.version }}
+      run: |
+        gh release create ${{ github.event.inputs.version }} \
+          --title "LocalShare ${{ github.event.inputs.version }}" \
+          --notes "## 🚀 LocalShare Release ${{ github.event.inputs.version }}
           
           ### 📦 Downloads
-          - **Windows**: `.exe` installer
-          - **macOS**: `.dmg` disk image
-          - **Linux**: `.AppImage` portable app
+          - **Windows**: \`.exe\` installer
+          - **macOS**: \`.dmg\` disk image
+          - **Linux**: \`.AppImage\` portable app
           
           ### 🔧 Installation
           1. Download the appropriate file for your platform
@@ -182,6 +173,18 @@ jobs:
           3. Follow the installation instructions
           
           ### 📋 Changes
-          See the commit history for detailed changes.
+          See the commit history for detailed changes." \
+          --draft=false \
+          --prerelease=false
+
+    - name: Upload Assets
+      run: |
+        # 上传所有构建产物
+        for file in artifacts/**/*; do
+          if [ -f "$file" ]; then
+            echo "Uploading: $file"
+            gh release upload ${{ github.event.inputs.version }} "$file"
+          fi
+        done
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
