@@ -93,6 +93,17 @@ rm -rf ~/.cache/electron-builder
 - 启用 npm 缓存
 - 使用并行构建减少内存使用
 
+### 8. FFmpeg DLL 错误
+
+**问题**: `The code execution can not proceed because ffmpeg.dll was not found`
+
+**解决方案**:
+- ✅ 已在 `electron/main.cjs` 中禁用 FFmpeg 相关功能
+- ✅ 移除了 `extraResources` 中的 FFmpeg 配置
+- ✅ 添加了构建测试脚本 `npm run test:build`
+
+**原因**: Electron 默认包含 FFmpeg 支持，但文件共享应用通常不需要
+
 ## 调试步骤
 
 ### 1. 检查构建日志

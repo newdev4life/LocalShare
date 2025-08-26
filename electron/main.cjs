@@ -1,4 +1,8 @@
 const { app } = require('electron')
+
+// 禁用 FFmpeg 以避免 ffmpeg.dll 错误
+app.commandLine.appendSwitch('disable-features', 'VizDisplayCompositor')
+app.commandLine.appendSwitch('disable-software-rasterizer')
 const HttpServer = require('./modules/httpServer.cjs')
 const WindowManager = require('./modules/windowManager.cjs')
 const IpcHandlers = require('./modules/ipcHandlers.cjs')

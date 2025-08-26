@@ -7,6 +7,7 @@
     "dev": "node scripts/dev.js",
     "build": "tsc -p tsconfig.node.json && vite build",
     "preview": "vite preview",
+    "test:build": "node scripts/test-build.js",
     "electron:build": "npm run build && electron-builder",
     "electron:build:win": "npm run build && electron-builder --win",
     "electron:build:mac": "npm run build && electron-builder --mac",
@@ -30,11 +31,31 @@
       "category": "public.app-category.utilities",
       "icon": "build/icons/icon.icns",
       "identity": null,
-      "hardenedRuntime": false
+      "hardenedRuntime": false,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ]
     },
     "win": {
-      "target": "nsis",
-      "icon": "build/icons/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icons/icon.ico",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "linux": {
       "target": "AppImage",
