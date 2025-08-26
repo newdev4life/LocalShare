@@ -45,7 +45,16 @@
    ```bash
    # 解决方案：清除缓存重新安装
    npm cache clean --force
-   npm ci
+   npm install
+   ```
+
+2. **package-lock.json 不同步**
+   ```bash
+   # 解决方案：更新 lock 文件
+   npm install
+   git add package-lock.json
+   git commit -m "Update package-lock.json"
+   git push origin main
    ```
 
 2. **TypeScript 编译错误**

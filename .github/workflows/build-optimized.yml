@@ -1,0 +1,159 @@
+name: Build Optimized
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for Windows
+      run: npm run electron:build -- --win
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: localshare-windows-optimized
+        path: |
+          release/*.exe
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 30
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for macOS
+      run: npm run electron:build -- --mac
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: localshare-macos-optimized
+        path: |
+          release/*.dmg
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 30
+
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for Linux
+      run: npm run electron:build -- --linux
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: localshare-linux-optimized
+        path: |
+          release/*.AppImage
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 30
+
+  analyze-size:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Download all build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Analyze package sizes
+      run: |
+        echo "📊 优化后的包大小分析:"
+        echo "─".repeat(60)
+        for file in artifacts/**/*; do
+          if [ -f "$file" ]; then
+            size=$(du -h "$file" | cut -f1)
+            echo "$(basename "$file"): $size"
+          fi
+        done 
