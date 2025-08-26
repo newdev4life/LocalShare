@@ -16,6 +16,14 @@ export default defineConfig({
     assetsDir: '.',
     emptyOutDir: true,
     chunkSizeWarningLimit: 1000, // 增加块大小警告限制到 1MB
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
+      }
+    },
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -29,6 +37,10 @@ export default defineConfig({
           // 将其他第三方库分离
           'vendor': ['electron']
         },
+        // 优化输出文件名
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       },
     },
   },

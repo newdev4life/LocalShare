@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.node.json && vite build",
     "preview": "vite preview",
     "test:build": "node scripts/test-build.js",
+    "analyze": "node scripts/analyze-size.js",
     "electron:build": "npm run build && electron-builder",
     "electron:build:win": "npm run build && electron-builder --win",
     "electron:build:mac": "npm run build && electron-builder --mac",
@@ -27,6 +28,10 @@
       "dist/**/*",
       "electron/**/*"
     ],
+    "compression": "maximum",
+    "removePackageScripts": true,
+    "removePackageKeywords": true,
+    "asar": true,
     "mac": {
       "category": "public.app-category.utilities",
       "icon": "build/icons/icon.icns",
@@ -41,7 +46,9 @@
           "target": "zip",
           "arch": ["x64", "arm64"]
         }
-      ]
+      ],
+      "compression": "maximum",
+      "artifactName": "${productName}-${version}-${arch}-mac.${ext}"
     },
     "win": {
       "target": [
@@ -55,11 +62,14 @@
         }
       ],
       "icon": "build/icons/icon.ico",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "compression": "maximum"
     },
     "linux": {
       "target": "AppImage",
-      "icon": "build/icons/png/512x512.png"
+      "icon": "build/icons/png/512x512.png",
+      "compression": "maximum",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "publish": null,
     "forceCodeSigning": false,
@@ -79,6 +89,7 @@
     "electron-builder": "^24.13.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "terser": "^5.28.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
