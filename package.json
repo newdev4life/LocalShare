@@ -114,7 +114,6 @@
     },
     "appImage": {
       "compression": "maximum",
-      "systemIntegration": "ask",
       "license": "LICENSE",
       "excludeFiles": [
         "*.map",
