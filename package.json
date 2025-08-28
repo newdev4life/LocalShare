@@ -112,14 +112,6 @@
     "rpm": {
       "compression": "xz"
     },
-    "appImage": {
-      "compression": "maximum",
-      "license": "LICENSE",
-      "excludeFiles": [
-        "*.map",
-        "node_modules/.cache/**/*"
-      ]
-    },
     "publish": null,
     "forceCodeSigning": false,
     "electronVersion": "29.4.6"
