@@ -1,7 +1,7 @@
 {
   "name": "localshare",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "node scripts/dev.js",
@@ -48,7 +48,15 @@
         }
       ],
       "compression": "maximum",
-      "artifactName": "${productName}-${version}-${arch}-mac.${ext}"
+      "artifactName": "${productName}-${version}-${arch}-mac.${ext}",
+      "extendInfo": {
+        "CFBundleDisplayName": "LocalShare",
+        "CFBundleExecutable": "LocalShare",
+        "CFBundleIdentifier": "com.localshare.app",
+        "CFBundleName": "LocalShare",
+        "CFBundleShortVersionString": "${version}",
+        "CFBundleVersion": "${version}"
+      }
     },
     "win": {
       "target": [
@@ -63,13 +71,39 @@
       ],
       "icon": "build/icons/icon.ico",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
-      "compression": "maximum"
+      "compression": "maximum",
+      "requestedExecutionLevel": "asInvoker",
+      "verifyUpdateCodeSignature": false
     },
     "linux": {
-      "target": "AppImage",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64"]
+        }
+      ],
       "icon": "build/icons/png/512x512.png",
+      "category": "Utility",
       "compression": "maximum",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "synopsis": "A simple and easy-to-use local network file sharing tool",
+      "description": "LocalShare enables quick file sharing between devices on the same network without complex configuration. Built with Electron for cross-platform compatibility.",
+      "maintainer": "LocalShare Team <localshare@example.com>",
+      "vendor": "LocalShare Team",
+      "desktop": {
+        "Name": "LocalShare",
+        "Comment": "Local network file sharing tool",
+        "Keywords": "file-sharing;network;local;transfer",
+        "StartupNotify": "true"
+      }
     },
     "publish": null,
     "forceCodeSigning": false,

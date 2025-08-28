@@ -18,6 +18,9 @@ class HttpServer {
     // 上传功能配置
     this.uploadEnabled = false
     this.uploadPath = process.cwd() // 默认上传到当前目录
+    
+    // 绑定清理函数到进程退出事件
+    this.bindCleanupEvents()
   }
 
   // 获取本地IP地址
@@ -481,11 +484,53 @@ class HttpServer {
 
   // 启动服务器
   start() {
+    // 如果服务器已经在运行，先停止它
+    if (this.server) {
+      this.stop()
+    }
+
     this.server = http.createServer((req, res) => {
       this.handleRequest(req, res)
     })
 
-    this.server.listen(this.port, () => {
+    // 设置服务器选项以避免端口占用问题
+    this.server.on('error', (err) => {
+      console.error('[localshare] server error:', err)
+      
+      // 如果是端口被占用错误，尝试使用其他端口
+      if (err.code === 'EADDRINUSE') {
+        console.log(`[localshare] Port ${this.port} is busy, trying next port...`)
+        this.port += 1
+        
+        // 限制端口范围，避免无限循环
+        if (this.port > 8100) {
+          console.error('[localshare] No available ports found in range 8080-8100')
+          if (this.onStatusChange) {
+            this.onStatusChange({
+              status: 'error',
+              error: 'No available ports found'
+            })
+          }
+          return
+        }
+        
+        // 延迟重试，避免立即重试
+        setTimeout(() => {
+          this.start()
+        }, 1000)
+        return
+      }
+      
+      if (this.onStatusChange) {
+        this.onStatusChange({
+          status: 'error',
+          error: err.message
+        })
+      }
+    })
+
+    // 设置 SO_REUSEADDR 选项以允许端口重用
+    this.server.on('listening', () => {
       this.serverAddress = `${this.getLocalIP()}:${this.port}`
       console.log(`[localshare] server running at http://${this.serverAddress}`)
       
@@ -497,24 +542,65 @@ class HttpServer {
       }
     })
 
-    this.server.on('error', (err) => {
-      console.error('[localshare] server error:', err)
-      
+    // 启动服务器并设置端口重用选项
+    try {
+      this.server.listen({
+        port: this.port,
+        host: '0.0.0.0'
+      })
+    } catch (err) {
+      console.error('[localshare] Failed to start server:', err)
       if (this.onStatusChange) {
         this.onStatusChange({
           status: 'error',
           error: err.message
         })
       }
-    })
+    }
   }
 
   // 停止服务器
   stop() {
-    if (this.server) {
-      this.server.close()
-      this.server = null
-    }
+    return new Promise((resolve) => {
+      if (this.server) {
+        console.log('[localshare] Stopping server...')
+        
+        // 停止接受新连接
+        this.server.close((err) => {
+          if (err) {
+            console.error('[localshare] Error stopping server:', err)
+          } else {
+            console.log('[localshare] Server stopped successfully')
+          }
+          
+          this.server = null
+          this.serverAddress = null
+          
+          if (this.onStatusChange) {
+            this.onStatusChange({
+              status: 'stopped'
+            })
+          }
+          
+          resolve()
+        })
+        
+        // 强制关闭所有活动连接
+        this.server.closeAllConnections?.()
+        
+        // 如果10秒内没有正常关闭，强制设置为null
+        setTimeout(() => {
+          if (this.server) {
+            console.log('[localshare] Force stopping server')
+            this.server = null
+            this.serverAddress = null
+            resolve()
+          }
+        }, 10000)
+      } else {
+        resolve()
+      }
+    })
   }
 
   // 更新共享文件
@@ -569,6 +655,67 @@ class HttpServer {
       enabled: this.uploadEnabled,
       path: this.uploadPath
     }
+  }
+
+  // 绑定清理事件监听器
+  bindCleanupEvents() {
+    // 处理进程退出事件
+    const cleanup = async () => {
+      console.log('[localshare] Cleaning up server on exit...')
+      await this.stop()
+    }
+
+    // 绑定各种退出信号
+    process.on('exit', cleanup)
+    process.on('SIGINT', cleanup)  // Ctrl+C
+    process.on('SIGTERM', cleanup) // 终止信号
+    process.on('SIGUSR1', cleanup) // 用户定义信号1
+    process.on('SIGUSR2', cleanup) // 用户定义信号2
+    
+    // 处理未捕获异常
+    process.on('uncaughtException', async (err) => {
+      console.error('[localshare] Uncaught exception:', err)
+      await cleanup()
+      process.exit(1)
+    })
+    
+    // 处理未处理的Promise拒绝
+    process.on('unhandledRejection', async (reason, promise) => {
+      console.error('[localshare] Unhandled rejection at:', promise, 'reason:', reason)
+      await cleanup()
+      process.exit(1)
+    })
+  }
+
+  // 检查端口是否可用
+  isPortAvailable(port) {
+    return new Promise((resolve) => {
+      const testServer = http.createServer()
+      
+      testServer.listen(port, (err) => {
+        if (err) {
+          resolve(false)
+        } else {
+          testServer.close(() => {
+            resolve(true)
+          })
+        }
+      })
+      
+      testServer.on('error', () => {
+        resolve(false)
+      })
+    })
+  }
+
+  // 查找可用端口
+  async findAvailablePort(startPort = 8080, endPort = 8100) {
+    for (let port = startPort; port <= endPort; port++) {
+      if (await this.isPortAvailable(port)) {
+        return port
+      }
+    }
+    throw new Error(`No available ports found in range ${startPort}-${endPort}`)
   }
 }
 

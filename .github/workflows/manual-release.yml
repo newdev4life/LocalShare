@@ -76,6 +76,12 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    - name: Update package version
+      run: |
+        VERSION=$(echo "${{ github.event.inputs.version }}" | sed 's/^v//')
+        npm version $VERSION --no-git-tag-version
+      shell: bash
+
     - name: Install dependencies
       run: npm ci
 
@@ -114,6 +120,12 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
+
+    - name: Update package version
+      run: |
+        VERSION=$(echo "${{ github.event.inputs.version }}" | sed 's/^v//')
+        npm version $VERSION --no-git-tag-version
+      shell: bash
 
     - name: Install dependencies
       run: npm ci

@@ -62,6 +62,14 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    - name: Update package version
+      run: |
+        if [ "$GITHUB_REF_TYPE" == "tag" ]; then
+          VERSION=$(echo "$GITHUB_REF_NAME" | sed 's/^v//')
+          npm version $VERSION --no-git-tag-version
+        fi
+      shell: bash
+
     - name: Install dependencies
       run: npm install
 
@@ -100,6 +108,14 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    - name: Update package version
+      run: |
+        if [ "$GITHUB_REF_TYPE" == "tag" ]; then
+          VERSION=$(echo "$GITHUB_REF_NAME" | sed 's/^v//')
+          npm version $VERSION --no-git-tag-version
+        fi
+      shell: bash
+
     - name: Install dependencies
       run: npm install
 
@@ -120,6 +136,8 @@ jobs:
         name: localshare-linux-optimized
         path: |
           release/*.AppImage
+          release/*.deb
+          release/*.rpm
           release/*.zip
           !release/*.blockmap
           !release/*.yml
