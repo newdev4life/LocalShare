@@ -92,7 +92,6 @@
       ],
       "icon": "build/icons/png/512x512.png",
       "category": "Utility",
-      "compression": "maximum",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "synopsis": "A simple and easy-to-use local network file sharing tool",
       "description": "LocalShare enables quick file sharing between devices on the same network without complex configuration. Built with Electron for cross-platform compatibility.",
@@ -103,6 +102,23 @@
         "Comment": "Local network file sharing tool",
         "Keywords": "file-sharing;network;local;transfer",
         "StartupNotify": "true"
+      },
+      "deb": {
+        "compression": "xz",
+        "priority": "optional",
+        "depends": []
+      },
+      "rpm": {
+        "compression": "xz"
+      },
+      "AppImage": {
+        "compression": "maximum",
+        "systemIntegration": "ask",
+        "license": "LICENSE",
+        "excludeFiles": [
+          "*.map",
+          "node_modules/.cache/**/*"
+        ]
       }
     },
     "publish": null,
