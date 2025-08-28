@@ -48,6 +48,170 @@ function renderPage({ title, content, serverAddress = '' }) {
     .upload-success { color: #10b981; }
     .upload-error { color: #ef4444; }
     .download-btn { padding: 4px 8px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
+    
+    /* Mobile Responsive Design */
+    @media (max-width: 768px) {
+      .container { 
+        margin: 16px auto; 
+        padding: 0 12px; 
+      }
+      
+      .header { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 8px; 
+        margin-bottom: 12px; 
+      }
+      
+      .title { 
+        font-size: 20px; 
+      }
+      
+      .addr { 
+        font-size: 12px; 
+        word-break: break-all; 
+      }
+      
+      .card { 
+        border-radius: 8px; 
+        margin: 0 -4px; 
+      }
+      
+      table { 
+        font-size: 14px; 
+      }
+      
+      th, td { 
+        padding: 8px 10px; 
+      }
+      
+      th { 
+        font-size: 12px; 
+      }
+      
+      .breadcrumb { 
+        margin: 12px 0; 
+        font-size: 12px; 
+        word-break: break-all; 
+      }
+      
+      .empty { 
+        padding: 32px 16px; 
+      }
+      
+      .empty .code { 
+        font-size: 36px; 
+      }
+      
+      .pin-form { 
+        padding: 32px 16px; 
+      }
+      
+      .pin-input { 
+        width: 100px; 
+        font-size: 16px; 
+        margin: 12px 4px; 
+      }
+      
+      .pin-btn { 
+        padding: 10px 20px; 
+        font-size: 13px; 
+      }
+      
+      .upload-section { 
+        padding: 16px; 
+      }
+      
+      .upload-form { 
+        flex-direction: column; 
+        align-items: stretch; 
+        gap: 8px; 
+      }
+      
+      .file-input { 
+        padding: 10px; 
+      }
+      
+      .upload-btn { 
+        padding: 10px 16px; 
+        align-self: center; 
+      }
+      
+      .download-btn { 
+        padding: 6px 10px; 
+        font-size: 11px; 
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container { 
+        padding: 0 8px; 
+      }
+      
+      .title { 
+        font-size: 18px; 
+      }
+      
+      .card { 
+        border-radius: 6px; 
+        border-left: none; 
+        border-right: none; 
+        margin: 0 -8px; 
+      }
+      
+      table { 
+        font-size: 13px; 
+      }
+      
+      th, td { 
+        padding: 6px 8px; 
+      }
+      
+      .empty { 
+        padding: 24px 12px; 
+      }
+      
+      .empty .code { 
+        font-size: 28px; 
+      }
+      
+      .pin-form { 
+        padding: 24px 12px; 
+      }
+      
+      .pin-input { 
+        width: 80px; 
+        font-size: 14px; 
+      }
+      
+      .upload-section { 
+        padding: 12px; 
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .pin-btn, .upload-btn, .download-btn {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+      
+      .pin-input {
+        min-height: 44px;
+      }
+      
+      a, button {
+        touch-action: manipulation;
+      }
+      
+      tr:hover td {
+        background: var(--card);
+      }
+      
+      tr:active td {
+        background: #0f172a;
+      }
+    }
   </style>
   </head>
   <body>
