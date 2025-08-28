@@ -102,24 +102,24 @@
         "Comment": "Local network file sharing tool",
         "Keywords": "file-sharing;network;local;transfer",
         "StartupNotify": "true"
-      },
-      "deb": {
-        "compression": "xz",
-        "priority": "optional",
-        "depends": []
-      },
-      "rpm": {
-        "compression": "xz"
-      },
-      "AppImage": {
-        "compression": "maximum",
-        "systemIntegration": "ask",
-        "license": "LICENSE",
-        "excludeFiles": [
-          "*.map",
-          "node_modules/.cache/**/*"
-        ]
       }
+    },
+    "deb": {
+      "compression": "xz",
+      "priority": "optional",
+      "depends": []
+    },
+    "rpm": {
+      "compression": "xz"
+    },
+    "appImage": {
+      "compression": "maximum",
+      "systemIntegration": "ask",
+      "license": "LICENSE",
+      "excludeFiles": [
+        "*.map",
+        "node_modules/.cache/**/*"
+      ]
     },
     "publish": null,
     "forceCodeSigning": false,
