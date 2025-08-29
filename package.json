@@ -85,13 +85,9 @@
         {
           "target": "deb",
           "arch": ["x64"]
-        },
-        {
-          "target": "rpm",
-          "arch": ["x64"]
         }
       ],
-      "icon": "build/icons/png/512x512.png",
+      "icon": "build/icons/icon.icns",
       "category": "Utility",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "synopsis": "A simple and easy-to-use local network file sharing tool",
@@ -111,11 +107,6 @@
       "depends": [],
       "packageCategory": "utils",
       "maintainer": "LocalShare Team <localshare@example.com>",
-      "vendor": "LocalShare Team"
-    },
-    "rpm": {
-      "compression": "xz",
-      "packageCategory": "utils",
       "vendor": "LocalShare Team"
     },
     "publish": null,
