@@ -10,7 +10,144 @@ permissions:
   actions: read
 
 jobs:
+  # Build for all platforms first
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Update package version
+      run: |
+        $VERSION = "${{ github.ref_name }}" -replace '^v', ''
+        npm version $VERSION --no-git-tag-version
+      shell: powershell
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for Windows
+      run: npm run electron:build -- --win
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-release
+        path: |
+          release/*.exe
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 1
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Update package version
+      run: |
+        VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+        npm version $VERSION --no-git-tag-version
+      shell: bash
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for macOS
+      run: npm run electron:build -- --mac
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-release
+        path: |
+          release/*.dmg
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 1
+
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Update package version
+      run: |
+        VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+        npm version $VERSION --no-git-tag-version
+      shell: bash
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Build for Linux
+      run: npm run electron:build -- --linux
+      env:
+        NODE_ENV: production
+        ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+        ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-release
+        path: |
+          release/*.AppImage
+          release/*.deb
+          release/*.rpm
+          release/*.zip
+          !release/*.blockmap
+          !release/*.yml
+        retention-days: 1
+
+  # Create release after all builds complete
   release:
+    needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     
     steps:
@@ -31,28 +168,38 @@ jobs:
           --notes "## 🚀 LocalShare Release ${{ github.ref_name }}
           
           ### 📦 Downloads
-          - **Windows**: \`.exe\` installer
-          - **macOS**: \`.dmg\` disk image
-          - **Linux**: \`.AppImage\` portable app
+          - **Windows**: \`.exe\` installer and portable \`.zip\`
+          - **macOS**: \`.dmg\` disk image and \`.zip\` archive  
+          - **Linux**: \`.AppImage\` portable, \`.deb\` package, \`.rpm\` package
           
           ### 🔧 Installation
-          1. Download the appropriate file for your platform
-          2. Run the installer or mount the disk image
-          3. Follow the installation instructions
+          
+          **Windows:**
+          - Download and run the \`.exe\` installer
+          - Or extract the portable \`.zip\` file
+          
+          **macOS:**
+          - Download and mount the \`.dmg\` file
+          - Or extract the \`.zip\` archive
+          
+          **Linux:**
+          - **AppImage**: Download, make executable, and run
+          - **DEB**: \`sudo dpkg -i LocalShare-*.deb\`
+          - **RPM**: \`sudo rpm -i LocalShare-*.rpm\`
           
           ### 📋 Changes
           See the commit history for detailed changes." \
           --draft=false \
           --prerelease=false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload Assets
+    - name: Upload Release Assets
       run: |
-        # 上传所有构建产物
-        for file in artifacts/**/*; do
-          if [ -f "$file" ]; then
-            echo "Uploading: $file"
-            gh release upload ${{ github.ref_name }} "$file"
-          fi
+        # Upload all build artifacts to the release
+        find artifacts/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.zip" \) | while read file; do
+          echo "Uploading: $file"
+          gh release upload ${{ github.ref_name }} "$file" --clobber
         done
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
