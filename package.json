@@ -12,7 +12,8 @@
     "electron:build": "npm run build && electron-builder",
     "electron:build:win": "npm run build && electron-builder --win",
     "electron:build:mac": "npm run build && electron-builder --mac",
-    "electron:build:linux": "npm run build && electron-builder --linux"
+    "electron:build:linux": "npm run build && electron-builder --linux",
+    "electron:build:linux:debug": "npm run build && electron-builder --linux --debug"
   },
   "keywords": ["electron", "file-sharing", "local-network", "desktop-app"],
   "author": "LocalShare Team",
@@ -107,10 +108,15 @@
     "deb": {
       "compression": "xz",
       "priority": "optional",
-      "depends": []
+      "depends": [],
+      "packageCategory": "utils",
+      "maintainer": "LocalShare Team <localshare@example.com>",
+      "vendor": "LocalShare Team"
     },
     "rpm": {
-      "compression": "xz"
+      "compression": "xz",
+      "packageCategory": "utils",
+      "vendor": "LocalShare Team"
     },
     "publish": null,
     "forceCodeSigning": false,

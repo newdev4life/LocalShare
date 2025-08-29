@@ -108,6 +108,23 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          rpm \
+          dpkg \
+          fakeroot \
+          dpkg-dev \
+          rpm-build \
+          libgtk-3-dev \
+          libwebkit2gtk-4.0-dev \
+          libappindicator3-dev \
+          librsvg2-dev \
+          patchelf \
+          desktop-file-utils \
+          xvfb
+
     - name: Update package version
       run: |
         if [ "$GITHUB_REF_TYPE" == "tag" ]; then
@@ -123,12 +140,35 @@ jobs:
       run: npm run build
 
     - name: Build for Linux
-      run: npm run electron:build -- --linux
+      run: |
+        # 设置显示环境变量
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        
+        # 检查环境
+        echo "🔍 构建环境检查:"
+        echo "Node.js 版本: $(node --version)"
+        echo "npm 版本: $(npm --version)"
+        echo "当前目录: $(pwd)"
+        echo "DISPLAY: $DISPLAY"
+        
+        # 构建 Linux 包
+        echo "🚀 开始构建 Linux 包..."
+        npm run electron:build -- --linux
+        
+        # 检查构建结果
+        echo "📋 构建完成，检查产物..."
       env:
         NODE_ENV: production
         ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
         ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: List build artifacts
+      run: |
+        echo "📦 构建产物列表:"
+        ls -la release/ || echo "release 目录不存在"
+        find . -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" 2>/dev/null || echo "未找到 Linux 包文件"
 
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v4
