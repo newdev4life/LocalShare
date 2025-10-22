@@ -396,13 +396,14 @@ class HttpServer {
       return
     }
 
-    const formidable = require('formidable')
+    const { formidable } = require('formidable');
+
     const form = formidable({
       uploadDir: this.getUploadDir(),
       keepExtensions: true,
       maxFileSize: 100 * 1024 * 1024, // 100MB 限制
       multiples: true
-    })
+    });
 
     form.parse(req, (err, fields, files) => {
       if (err) {
