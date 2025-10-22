@@ -190,10 +190,12 @@ jobs:
     - name: Analyze package sizes
       run: |
         echo "📊 优化后的包大小分析:"
-        echo "─".repeat(60)
-        for file in artifacts/**/*; do
-          if [ -f "$file" ]; then
-            size=$(du -h "$file" | cut -f1)
-            echo "$(basename "$file"): $size"
-          fi
-        done 
+        printf '%0.s─' {1..60}; echo
+        if [ ! -d artifacts ]; then
+          echo "未找到 artifacts 目录"
+          exit 0
+        fi
+        find artifacts -type f -print0 | while IFS= read -r -d '' file; do
+          size=$(du -h "$file" | cut -f1)
+          echo "$(basename "$file"): $size"
+        done
