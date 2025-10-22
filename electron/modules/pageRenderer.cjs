@@ -24,12 +24,13 @@ function renderPage({ title, content, serverAddress = '' }) {
     .title { font-size: 22px; font-weight: 700; }
     .addr { color: var(--muted); font-size: 13px; }
     .card { background: var(--card); border: 1px solid #1f2937; border-radius: 12px; overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #1f2937; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #1f2937; overflow: hidden; text-overflow: ellipsis; }
     th { color: var(--muted); font-weight: 600; font-size: 13px; background: #0f172a; }
     tr:hover td { background: #0f172a; }
     a { color: var(--accent); text-decoration: none; }
     .type { font-size: 12px; color: var(--muted); }
+    td:first-child { word-break: break-all; }
     .breadcrumb { margin: 16px 0; font-size: 13px; color: var(--muted); }
     .breadcrumb a { color: var(--accent); }
     .empty { padding: 48px; text-align: center; }
@@ -165,6 +166,14 @@ function renderPage({ title, content, serverAddress = '' }) {
       
       th, td { 
         padding: 6px 8px; 
+      }
+
+      /* Hide size column on very small screens, emphasize name and action */
+      thead th:nth-child(2), tbody td:nth-child(2) {
+        display: none;
+      }
+      thead th:nth-child(3), tbody td:nth-child(3) {
+        text-align: right;
       }
       
       .empty { 

@@ -173,7 +173,8 @@ class HttpServer {
         <tbody>${rows || '<tr><td colspan="3">暂无共享文件</td></tr>'}</tbody>
       </table>
       <script>
-        document.querySelector('.upload-form').addEventListener('submit', async (e) => {
+        const uploadFormEl = document.querySelector('.upload-form')
+        if (uploadFormEl) uploadFormEl.addEventListener('submit', async (e) => {
           e.preventDefault()
           const formData = new FormData()
           const fileInput = document.querySelector('input[type="file"]')
