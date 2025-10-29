@@ -25,12 +25,12 @@ function renderPage({ title, content, serverAddress = '' }) {
     .addr { color: var(--muted); font-size: 13px; }
     .card { background: var(--card); border: 1px solid #1f2937; border-radius: 12px; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #1f2937; overflow: hidden; text-overflow: ellipsis; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #1f2937; }
     th { color: var(--muted); font-weight: 600; font-size: 13px; background: #0f172a; }
     tr:hover td { background: #0f172a; }
     a { color: var(--accent); text-decoration: none; }
     .type { font-size: 12px; color: var(--muted); }
-    td:first-child { word-break: break-all; }
+    td:first-child { word-break: break-all; overflow-wrap: anywhere; }
     .breadcrumb { margin: 16px 0; font-size: 13px; color: var(--muted); }
     .breadcrumb a { color: var(--accent); }
     .empty { padding: 48px; text-align: center; }
@@ -48,7 +48,7 @@ function renderPage({ title, content, serverAddress = '' }) {
     .upload-status { margin-top: 12px; font-size: 13px; }
     .upload-success { color: #10b981; }
     .upload-error { color: #ef4444; }
-    .download-btn { padding: 4px 8px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
+    .download-btn { padding: 4px 8px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; white-space: nowrap; }
     
     /* Mobile Responsive Design */
     @media (max-width: 768px) {
@@ -200,9 +200,16 @@ function renderPage({ title, content, serverAddress = '' }) {
     
     /* Touch-friendly improvements */
     @media (hover: none) and (pointer: coarse) {
-      .pin-btn, .upload-btn, .download-btn {
+      .pin-btn, .upload-btn {
         min-height: 44px;
         touch-action: manipulation;
+      }
+      
+      /* keep download button compact on mobile */
+      .download-btn {
+        touch-action: manipulation;
+        min-height: unset;
+        line-height: 1.2;
       }
       
       .pin-input {
